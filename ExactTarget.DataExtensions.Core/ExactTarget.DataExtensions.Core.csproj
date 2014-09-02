@@ -32,6 +32,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -39,8 +41,121 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Configuration\ExactTargetConfiguration.cs" />
+    <Compile Include="Configuration\IExactTargetConfiguration.cs" />
+    <Compile Include="DataExtensionClient.cs" />
+    <Compile Include="ExactTargetResultChecker.cs" />
+    <Compile Include="ExternalKeyGenerator.cs" />
+    <Compile Include="IDataExtensionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service References\ExactTargetApi\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Shared\ISharedCoreRequestClient.cs" />
+    <Compile Include="Shared\SharedCoreRequestClient.cs" />
+    <Compile Include="SoapClientFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Service References\ExactTargetApi\etframework.wsdl" />
+    <None Include="Service References\ExactTargetApi\ETFrameworkFault.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.APIObject.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ConfigureResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ConfigureResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.CreateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.CreateResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.DeleteResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.DeleteResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.DescribeResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ExecuteResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ExecuteResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ExtractResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ExtractResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.GetSystemStatusResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ObjectDefinition.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.PerformResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.PerformResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.QueryResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.RetrieveResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ScheduleResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.ScheduleResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.SystemStatusResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.UpdateResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.UpdateResult.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.VersionInfoResponse.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\ExactTargetApi\ExactTarget.DataExtensions.Core.ExactTargetApi.VersionInfoResponse1.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\ExactTargetApi\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ExactTargetApi\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ExactTargetApi\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ExactTargetApi\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
