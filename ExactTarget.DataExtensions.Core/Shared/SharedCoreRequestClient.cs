@@ -7,12 +7,12 @@ namespace ExactTarget.DataExtensions.Core.Shared
     public class SharedCoreRequestClient : ISharedCoreRequestClient
     {
         private readonly IExactTargetConfiguration _config;
-        private readonly SoapClient _client;
+        private readonly IExactTargetApiClient _client;
 
-        public SharedCoreRequestClient(IExactTargetConfiguration config)
+        public SharedCoreRequestClient(IExactTargetConfiguration config, IExactTargetApiClient client)
         {
-            _client = SoapClientFactory.Manufacture(config);
             _config = config;
+            _client = client;
         }
 
         public bool DoesObjectExist(string propertyName, string value, string objectType)
@@ -32,10 +32,7 @@ namespace ExactTarget.DataExtensions.Core.Shared
                 }
             };
 
-            string requestId;
-            APIObject[] results;
-
-            _client.Retrieve(request, out requestId, out results);
+            var results = _client.Retrieve(request);
 
             return results != null && results.Any();
         }
@@ -57,10 +54,7 @@ namespace ExactTarget.DataExtensions.Core.Shared
                 }
             };
 
-            string requestId;
-            APIObject[] results;
-
-            _client.Retrieve(request, out requestId, out results);
+            var results = _client.Retrieve(request);
 
             if (results != null && results.Any())
             {

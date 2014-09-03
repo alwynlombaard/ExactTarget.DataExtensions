@@ -4,9 +4,9 @@ namespace ExactTarget.DataExtensions.Core
 {
     public interface IDataExtensionClient
     {
-        void CreateDataExtension(DataExtensionRequest dataExtension);
-        
-        void CreateDataExtensions(IEnumerable<DataExtensionRequest> dataExtensions);
+        void CreateDataExtension(DataExtensionRequest request);
+
+        IEnumerable<ResultError> CreateDataExtensions(IEnumerable<DataExtensionRequest> dataExtensions);
 
         bool DoesDataExtensionExist(string externalKey);
         

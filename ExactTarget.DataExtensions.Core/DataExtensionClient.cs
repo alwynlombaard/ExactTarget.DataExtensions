@@ -9,47 +9,53 @@ namespace ExactTarget.DataExtensions.Core
     public class DataExtensionClient : IDataExtensionClient
     {
         private readonly IExactTargetConfiguration _config;
-        private readonly SoapClient _client;
-        private readonly SharedCoreRequestClient _sharedCoreRequestClient;
+        private readonly IExactTargetApiClient _client;
+        private readonly ISharedCoreRequestClient _sharedCoreRequestClient;
 
-        public DataExtensionClient(IExactTargetConfiguration config)
+        public DataExtensionClient(IExactTargetConfiguration config, IExactTargetApiClient client, ISharedCoreRequestClient sharedCoreRequestClient)
         {
             _config = config;
-            _client = SoapClientFactory.Manufacture(config);
-            _sharedCoreRequestClient = new SharedCoreRequestClient(config);
+            _client = client;
+            _sharedCoreRequestClient = sharedCoreRequestClient;
         }
 
-        public void CreateDataExtensions(IEnumerable<DataExtensionRequest> dataExtensions)
+        public IEnumerable<ResultError> CreateDataExtensions(IEnumerable<DataExtensionRequest> requests)
         {
+            var dataExtensionRequests = requests as DataExtensionRequest[] ?? requests.ToArray();
+            
+            if (requests == null || !dataExtensionRequests.Any())
+            {
+                return Enumerable.Empty<ResultError>();
+            }
+            var dataExtensions = new List<APIObject>();
+
+            foreach (var request in dataExtensionRequests)
+            {
+                var de = MapFrom(request);
+                if (de != null)
+                {
+                    dataExtensions.Add(de);
+                }
+            }
+
+            var result = _client.Create(dataExtensions.ToArray());
+
+            return ExactTargetResultChecker.CheckResults(result);
+
         }
 
-        public void CreateDataExtension(DataExtensionRequest dataExtension)
+        public void CreateDataExtension(DataExtensionRequest request)
         {
-            if (dataExtension == null)
+            if (request == null)
             {
                 return;
             }
 
-            var de = new DataExtension
-            {
-                Client = _config.ClientId.HasValue ? new ClientID { ID = _config.ClientId.Value, IDSpecified = true } : null,
-                Name = dataExtension.Name,
-                CustomerKey = dataExtension.ExternalKey,
-                Template =  string.IsNullOrEmpty(dataExtension.TemplateObjectId) 
-                    ? null
-                    : new DataExtensionTemplate { ObjectID = dataExtension.TemplateObjectId },
-                Fields = dataExtension.Fields.Select(field => new DataExtensionField
-                {
-                    Name = field,
-                    FieldType = DataExtensionFieldType.Text,
-                    FieldTypeSpecified = true,
-                }).ToArray(),
-            };
+            var de = MapFrom(request);
 
-            string requestId, status;
-            var result = _client.Create(new CreateOptions(), new APIObject[] { de }, out requestId, out status);
+            var result = _client.Create(de);
 
-            ExactTargetResultChecker.CheckResult(result.FirstOrDefault()); //we expect only one result because we've sent only one APIObject
+            ExactTargetResultChecker.CheckResult(result); 
         }
 
         public bool DoesDataExtensionExist(string externalKey)
@@ -60,6 +66,30 @@ namespace ExactTarget.DataExtensions.Core
         public string RetrieveTriggeredSendDataExtensionTemplateObjectId()
         {
             return _sharedCoreRequestClient.RetrieveObjectId("Name", "TriggeredSendDataExtension", "DataExtensionTemplate");
+        }
+
+        private DataExtension MapFrom(DataExtensionRequest request)
+        {
+            if (request == null)
+            {
+                return null;
+            }
+
+            return new DataExtension
+            {
+                Client = _config.ClientId.HasValue ? new ClientID { ID = _config.ClientId.Value, IDSpecified = true } : null,
+                Name = request.Name,
+                CustomerKey = request.ExternalKey,
+                Template = string.IsNullOrEmpty(request.TemplateObjectId)
+                    ? null
+                    : new DataExtensionTemplate { ObjectID = request.TemplateObjectId },
+                Fields = request.Fields.Select(field => new DataExtensionField
+                {
+                    Name = field,
+                    FieldType = DataExtensionFieldType.Text,
+                    FieldTypeSpecified = true,
+                }).ToArray(),
+            };
         }
     }
 }
