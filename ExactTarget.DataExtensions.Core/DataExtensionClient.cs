@@ -6,16 +6,6 @@ using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
 namespace ExactTarget.DataExtensions.Core
 {
-
-    public class DataExtensionRequest
-    {
-        public string TemplateObjectId { get; set; }
-        public string ExernalKey { get; set; }
-        public string Name { get; set; }
-        public HashSet<string> Fields { get; set; } 
-    }
-
-
     public class DataExtensionClient : IDataExtensionClient
     {
         private readonly IExactTargetConfiguration _config;
@@ -29,22 +19,26 @@ namespace ExactTarget.DataExtensions.Core
             _sharedCoreRequestClient = new SharedCoreRequestClient(config);
         }
 
-        public void CreateDataExtension(IEnumerable<DataExtensionRequest> dataExtensions)
+        public void CreateDataExtensions(IEnumerable<DataExtensionRequest> dataExtensions)
         {
         }
 
-        public void CreateDataExtension(string dataExtensionTemplateObjectId,
-                                           string externalKey,
-                                           string name,
-                                           HashSet<string> fields)
+        public void CreateDataExtension(DataExtensionRequest dataExtension)
         {
+            if (dataExtension == null)
+            {
+                return;
+            }
+
             var de = new DataExtension
             {
                 Client = _config.ClientId.HasValue ? new ClientID { ID = _config.ClientId.Value, IDSpecified = true } : null,
-                Name = name,
-                CustomerKey = externalKey,
-                Template = new DataExtensionTemplate { ObjectID = dataExtensionTemplateObjectId },
-                Fields = fields.Select(field => new DataExtensionField
+                Name = dataExtension.Name,
+                CustomerKey = dataExtension.ExternalKey,
+                Template =  string.IsNullOrEmpty(dataExtension.TemplateObjectId) 
+                    ? null
+                    : new DataExtensionTemplate { ObjectID = dataExtension.TemplateObjectId },
+                Fields = dataExtension.Fields.Select(field => new DataExtensionField
                 {
                     Name = field,
                     FieldType = DataExtensionFieldType.Text,
