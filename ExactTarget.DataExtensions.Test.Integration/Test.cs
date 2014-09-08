@@ -15,18 +15,20 @@ namespace ExactTarget.DataExtensions.Test.Integration
         {
             _config = new ExactTargetConfiguration
             {
-                EndPoint = "",
+                EndPoint = "https://webservice.s6.exacttarget.com/Service.asmx",
                 ApiUserName = "",
                 ApiPassword = "",
-                ClientId = 122
+                ClientId = 0
                 
             };
         }
-
+      
         [Test]
         public void TestS()
         {
-            var client = new DataExtensionClient(_config, null, null);
+            var apiClient = new ExactTargetApiClient(_config);
+
+            var client = new DataExtensionClient(_config, apiClient);
 
             var dataExtensions = new List<DataExtensionRequest>
             {
@@ -56,7 +58,12 @@ namespace ExactTarget.DataExtensions.Test.Integration
                 }
             };
 
-            client.CreateDataExtensions(dataExtensions);
+            foreach (var dataExtensionRequest in dataExtensions)
+            {
+                client.CreateDataExtension(dataExtensionRequest);
+            }
+            
+            Assert.Fail();
         }
     }
 }

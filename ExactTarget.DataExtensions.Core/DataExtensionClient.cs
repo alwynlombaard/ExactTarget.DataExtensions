@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ExactTarget.DataExtensions.Core.Configuration;
-using ExactTarget.DataExtensions.Core.Shared;
 using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
 namespace ExactTarget.DataExtensions.Core
@@ -10,13 +9,11 @@ namespace ExactTarget.DataExtensions.Core
     {
         private readonly IExactTargetConfiguration _config;
         private readonly IExactTargetApiClient _client;
-        private readonly ISharedCoreRequestClient _sharedCoreRequestClient;
 
-        public DataExtensionClient(IExactTargetConfiguration config, IExactTargetApiClient client, ISharedCoreRequestClient sharedCoreRequestClient)
+        public DataExtensionClient(IExactTargetConfiguration config, IExactTargetApiClient client)
         {
             _config = config;
             _client = client;
-            _sharedCoreRequestClient = sharedCoreRequestClient;
         }
 
         public IEnumerable<ResultError> CreateDataExtensions(IEnumerable<DataExtensionRequest> requests)
@@ -39,9 +36,7 @@ namespace ExactTarget.DataExtensions.Core
             }
 
             var result = _client.Create(dataExtensions.ToArray());
-
             return ExactTargetResultChecker.CheckResults(result);
-
         }
 
         public void CreateDataExtension(DataExtensionRequest request)
@@ -60,12 +55,12 @@ namespace ExactTarget.DataExtensions.Core
 
         public bool DoesDataExtensionExist(string externalKey)
         {
-            return _sharedCoreRequestClient.DoesObjectExist("CustomerKey", externalKey, "DataExtension");
+            return _client.DoesObjectExist("CustomerKey", externalKey, "DataExtension");
         }
 
         public string RetrieveTriggeredSendDataExtensionTemplateObjectId()
         {
-            return _sharedCoreRequestClient.RetrieveObjectId("Name", "TriggeredSendDataExtension", "DataExtensionTemplate");
+            return _client.RetrieveObjectId("Name", "TriggeredSendDataExtension", "DataExtensionTemplate");
         }
 
         private DataExtension MapFrom(DataExtensionRequest request)

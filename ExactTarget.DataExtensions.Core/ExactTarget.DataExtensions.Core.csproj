@@ -55,15 +55,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Reference.svcmap</DependentUpon>
     </Compile>
-    <Compile Include="Shared\ISharedCoreRequestClient.cs" />
-    <Compile Include="Shared\SharedCoreRequestClient.cs" />
     <Compile Include="SoapClientFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\ExactTargetApi\etframework.wsdl" />
     <None Include="Service References\ExactTargetApi\ETFrameworkFault.xsd">
       <SubType>Designer</SubType>
