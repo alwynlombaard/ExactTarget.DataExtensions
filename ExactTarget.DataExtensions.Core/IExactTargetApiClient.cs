@@ -6,17 +6,23 @@ namespace ExactTarget.DataExtensions.Core
 {
     public interface IExactTargetApiClient
     {
+       IExactTargetConfiguration Config { get; }
        CreateResult Create(APIObject apiObject);
        CreateResult[] Create(APIObject[] apiObject);
        APIObject[] Retrieve(RetrieveRequest request);
        bool DoesObjectExist(string propertyName, string value, string objectType);
        string RetrieveObjectId(string propertyName, string value, string objectType);
+       ObjectDefinition[] Describe(ObjectDefinitionRequest[] requests);
     }
 
     public class ExactTargetApiClient : IExactTargetApiClient
     {
         private readonly IExactTargetConfiguration _config;
         private readonly SoapClient _client;
+
+        public IExactTargetConfiguration Config {
+            get { return _config; }
+        }
 
         public ExactTargetApiClient(IExactTargetConfiguration config)
         {
@@ -70,6 +76,7 @@ namespace ExactTarget.DataExtensions.Core
             return results != null && results.Any();
         }
 
+
         public string RetrieveObjectId(string propertyName, string value, string objectType)
         {
             var request = new RetrieveRequest
@@ -97,6 +104,11 @@ namespace ExactTarget.DataExtensions.Core
             return string.Empty;
         }
 
-
+        public ObjectDefinition[] Describe(ObjectDefinitionRequest[] requests)
+        {
+            string requestId;
+            var results = _client.Describe(requests, out requestId);
+            return results;
+        }
     }
 }

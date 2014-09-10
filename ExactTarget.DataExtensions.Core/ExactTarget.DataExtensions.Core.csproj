@@ -44,6 +44,8 @@
     <Compile Include="Configuration\ExactTargetConfiguration.cs" />
     <Compile Include="Configuration\IExactTargetConfiguration.cs" />
     <Compile Include="DataExtensionClient.cs" />
+    <Compile Include="DataExtensionDto.cs" />
+    <Compile Include="DataExtensionRecordDto.cs" />
     <Compile Include="DataExtensionRequest.cs" />
     <Compile Include="ExactTargetResultChecker.cs" />
     <Compile Include="ExternalKeyGenerator.cs" />
