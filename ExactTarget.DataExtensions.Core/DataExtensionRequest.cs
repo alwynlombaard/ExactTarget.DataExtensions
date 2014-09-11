@@ -6,12 +6,12 @@ namespace ExactTarget.DataExtensions.Core
     {
         public DataExtensionRequest()
         {
-            Fields = new Dictionary<string, FieldType>();
+            Fields = new HashSet<Field>();
         }
         public string TemplateObjectId { get; set; }
         public string ExternalKey { get; set; }
         public string Name { get; set; }
-        public Dictionary<string, FieldType> Fields { get; set; } 
+        public HashSet<Field> Fields { get; set; } 
     }
 
     public enum FieldType

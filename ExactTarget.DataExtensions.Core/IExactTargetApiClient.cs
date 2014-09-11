@@ -9,7 +9,9 @@ namespace ExactTarget.DataExtensions.Core
     {
        IExactTargetConfiguration Config { get; }
        void Create(APIObject apiObject);
+       void Update(APIObject apiObject);
        IEnumerable<ResultError> Create(APIObject[] apiObject);
+       IEnumerable<ResultError> Update(APIObject[] apiObject);
        void Delete(APIObject apiObject);
        APIObject[] Retrieve(RetrieveRequest request);
        bool DoesObjectExist(string propertyName, string value, string objectType);
@@ -42,14 +44,46 @@ namespace ExactTarget.DataExtensions.Core
         public void Create(APIObject apiObject)
         {
             string requestId, status;
-            var result = _client.Create(new CreateOptions(), new [] { apiObject }, out requestId, out status);
+            var result = _client.Create(new CreateOptions(), 
+                new [] { apiObject }, 
+                out requestId, 
+                out status);
+            ExactTargetResultChecker.CheckResult(result.FirstOrDefault());
+        }
+        
+        public void Update(APIObject apiObject)
+        {
+            string requestId, status;
+            var result = _client.Update(new UpdateOptions
+                {
+                    SaveOptions = new[] { new SaveOption { SaveAction = SaveAction.UpdateAdd, PropertyName = "DataExtensionObject" } }
+                },
+                new[] { apiObject },
+                out requestId,
+                out status);
             ExactTargetResultChecker.CheckResult(result.FirstOrDefault());
         }
 
         public IEnumerable<ResultError> Create(APIObject[] apiObjects)
         {
             string requestId, status;
-            var results = _client.Create(new CreateOptions(), apiObjects, out requestId, out status);
+            var results = _client.Create(new CreateOptions(), 
+                apiObjects, 
+                out requestId, 
+                out status);
+            return ExactTargetResultChecker.CheckResults(results);
+        }
+
+        public IEnumerable<ResultError> Update(APIObject[] apiObjects)
+        {
+            string requestId, status;
+            var results = _client.Update(new UpdateOptions
+                {
+                    SaveOptions = new[] { new SaveOption { SaveAction = SaveAction.UpdateAdd, PropertyName = "DataExtensionObject" } }
+                },
+                apiObjects,
+                out requestId,
+                out status);
             return ExactTargetResultChecker.CheckResults(results);
         }
 

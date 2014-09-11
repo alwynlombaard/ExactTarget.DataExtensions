@@ -117,7 +117,7 @@ namespace ExactTarget.DataExtensions.Core
             return _client.RetrieveObjectId("CustomerKey", externalKey, "DataExtension");
         }
 
-        public void Insert(string externalKey, Dictionary<string, string> values)
+        public void InsertOrUpdate(string externalKey, Dictionary<string, string> values)
         {
             var apiProperties = new List<APIProperty>();
             foreach (var key in values.Keys)
@@ -138,10 +138,10 @@ namespace ExactTarget.DataExtensions.Core
                     CustomerKey = externalKey,
                 }
             };
-            _client.Create(apiObjects);
+            _client.Update(apiObjects);
         }
 
-        public void Insert(string externalKey, IEnumerable<Dictionary<string, string>> values)
+        public void InsertOrUpdate(string externalKey, IEnumerable<Dictionary<string, string>> values)
         {
             var apiObjects = new List<APIObject>();    
             foreach (var value in values)
@@ -162,7 +162,7 @@ namespace ExactTarget.DataExtensions.Core
                     CustomerKey = externalKey,
                 });
             }
-            _client.Create(apiObjects.ToArray());
+            _client.Update(apiObjects.ToArray());
         }
 
         private IEnumerable<string> GetRetrievableProperties(string objectType)
@@ -218,7 +218,7 @@ namespace ExactTarget.DataExtensions.Core
             }
 
             DataExtensionFieldType etFieldType;
-            return new DataExtension
+            var de = new DataExtension
             {
                 Client = _client.Config.ClientId.HasValue ? new ClientID { ID = _client.Config.ClientId.Value, IDSpecified = true } : null,
                 Name = request.Name,
@@ -228,11 +228,25 @@ namespace ExactTarget.DataExtensions.Core
                     : new DataExtensionTemplate { ObjectID = request.TemplateObjectId },
                 Fields = request.Fields.Select(field => new DataExtensionField
                 {
-                    Name = field.Key,
-                    FieldType = Enum.TryParse(field.Value.ToString(), true, out etFieldType)  ? etFieldType :  DataExtensionFieldType.Text,
+                    Name = field.Name,
+                    FieldType = Enum.TryParse(field.FieldType.ToString(), true, out etFieldType)  ? etFieldType :  DataExtensionFieldType.Text,
                     FieldTypeSpecified = true,
                 }).ToArray(),
             };
+
+            if (de.Fields.Any())
+            {
+                if (de.Fields.First().FieldType == DataExtensionFieldType.Text)
+                {
+                    de.Fields.First().MaxLength = Guid.Empty.ToString().Length;
+                    de.Fields.First().MaxLengthSpecified = true;
+                }
+                de.Fields.First().IsRequired = true;
+                de.Fields.First().IsRequiredSpecified = true;
+                de.Fields.First().IsPrimaryKey = true;
+                de.Fields.First().IsPrimaryKeySpecified = true;
+            }
+            return de;
         }
 
        

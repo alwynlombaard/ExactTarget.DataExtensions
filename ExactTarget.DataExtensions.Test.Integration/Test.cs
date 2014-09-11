@@ -11,119 +11,125 @@ namespace ExactTarget.DataExtensions.Test.Integration
     public class Test
     {
         private ExactTargetConfiguration _config;
+        private string _externalKey;
+        private ExactTargetApiClient _apiClient;
+        private HashSet<Field> _fieldDefinitions;
+        private DataExtensionClient _client;
 
-        [SetUp]
-        public void SetUp()
+        [TestFixtureSetUp]
+        public void TestFixtureSetUp()
         {
+            _externalKey = "test-" + DateTime.Now.ToString("u");
             _config = new ExactTargetConfiguration
             {
                 EndPoint = "https://webservice.s6.exacttarget.com/Service.asmx",
                 ApiUserName = "",
                 ApiPassword = "",
                 ClientId = 6269489
-                
             };
+            _apiClient = new ExactTargetApiClient(_config);
+            _fieldDefinitions = new HashSet<Field>
+            {
+                new Field{Name =  "IdField", FieldType = FieldType.Text},
+                new Field{Name =  "BooleanField", FieldType = FieldType.Boolean},
+                new Field{Name =  "DateField", FieldType = FieldType.Date},
+                new Field{Name =  "TextField", FieldType = FieldType.Text},
+                new Field{Name =  "EmailAddressField", FieldType = FieldType.EmailAddress}
+            };
+            _client = new DataExtensionClient(_apiClient);
+            var createRequest = new DataExtensionRequest
+            {
+                ExternalKey = _externalKey,
+                Fields = _fieldDefinitions,
+                Name = "Name:" + _externalKey,
+            };
+
+            Assert.That(_client.DoesDataExtensionExist(_externalKey), Is.False);
+            Assert.DoesNotThrow(() => _client.CreateDataExtension(createRequest));
+            Assert.That(_client.DoesDataExtensionExist(_externalKey), Is.True);
+
         }
-     
+
+        [TestFixtureTearDown]
+        public void TestFixtureTearDown()
+        {
+            Assert.DoesNotThrow(() => _client.Delete(_externalKey));
+            Assert.That(_client.DoesDataExtensionExist(_externalKey), Is.False);
+        }
+        
+        [SetUp]
+        public void SetUp()
+        {
+            
+        }
+
         [Test]
         public void IntegrationTest()
         {
-            var externalKey = "alwyn-" + DateTime.Now.ToString("MM-HH-mm");
-            var apiClient = new ExactTargetApiClient(_config);
-            var client = new DataExtensionClient(apiClient);
+           
+            var dataExtensionDef = _client.RetrieveDefinition(_externalKey);
+            Assert.That(dataExtensionDef.ExternalKey, Is.EqualTo(_externalKey));
 
-            var createRequest = new DataExtensionRequest
-            {
-                ExternalKey = externalKey,
-                Fields =
-                    new Dictionary<string, FieldType>
-                    {
-                        {"field 1", FieldType.Boolean},
-                        {"field 2", FieldType.Date},
-                        {"Text", FieldType.Text}
-                    },
-                Name = "Name:" + externalKey,
-            };
+            var fields = _client.GetFields(_externalKey).ToArray();
+            Assert.That(fields.Count(), Is.EqualTo(_fieldDefinitions.Count));
 
-            Assert.That(client.DoesDataExtensionExist(externalKey), Is.False);
-            Assert.DoesNotThrow(() => client.CreateDataExtension(createRequest));
-            Assert.That(client.DoesDataExtensionExist(externalKey), Is.True);
+            Assert.DoesNotThrow(() =>  _client.InsertOrUpdate(_externalKey, GenerateTestRecord(_fieldDefinitions)));
 
-            var fields = client.GetFields(externalKey).ToArray();
-            Assert.That(fields.Count(), Is.EqualTo(3));
 
-            Assert.DoesNotThrow(() =>  client.Insert(externalKey, new Dictionary<string, string>
-            {
-                { "field 1", "true" },
-                { "field 2", "12 Apr 2012" },
-                { "Text", "Hello text" },
-            }));
+            var record = GenerateTestRecord(_fieldDefinitions);
+            Assert.DoesNotThrow(() => _client.InsertOrUpdate(_externalKey, record));
 
-            Assert.DoesNotThrow(() => client.Insert(externalKey, new Dictionary<string, string>
-            {
-                { "field 1", "false" },
-                { "field 2", "13 Apr 2012" },
-                { "Text", "Hello text 2" },
-            }));
-
-            var records = client.RetrieveRecords(externalKey, "field 1", "true");
+            var records = _client.RetrieveRecords(_externalKey, "IdField", record["IdField"]);
             Assert.That(records.Count(), Is.EqualTo(1));
 
-            records = client.RetrieveRecords(externalKey).ToArray();
+            records = _client.RetrieveRecords(_externalKey).ToArray();
             Assert.That(records.Count(), Is.EqualTo(2));
-
             
-            Assert.DoesNotThrow(() => client.Insert(externalKey,
+            Assert.DoesNotThrow(() => _client.InsertOrUpdate(_externalKey,
                 new List<Dictionary<string, string>>{
-                    new Dictionary<string, string>
-                        {
-                            { "field 1", "false" },
-                            { "field 2", "14 Apr 2012" },
-                            { "Text", "Hello text 3" },
-                        },
-                        new Dictionary<string, string>
-                        {
-                            { "field 1", "true" },
-                            { "field 2", "15 Apr 2012" },
-                            { "Text", "Hello text 4" },
-                        }}
-                   ));
+                       GenerateTestRecord(_fieldDefinitions),
+                       GenerateTestRecord(_fieldDefinitions),
+                }));
 
-            records = client.RetrieveRecords(externalKey).ToArray();
+            records = _client.RetrieveRecords(_externalKey).ToArray();
             Assert.That(records.Count(), Is.EqualTo(4));
 
             var batch = new List<Dictionary<string, string>>();
             for (var i = 0; i < 200; i++)
             {
-                var fieldValues = new Dictionary<string, string>();
-                foreach (var field in fields)
-                {
-                    switch (field.FieldType)
-                    {
-                        case FieldType.Boolean:
-                            fieldValues.Add(field.Name, "true");
-                            break;
-                        case FieldType.Date:
-                             fieldValues.Add(field.Name, DateTime.Now.AddDays(i).ToString("u"));
-                             break;
-                        case FieldType.Text:
-                             fieldValues.Add(field.Name, "Text value");
-                             break;
-                        case FieldType.EmailAddress:
-                             fieldValues.Add(field.Name, "name@domain.uri");
-                             break;
-                    }
-                }
-                batch.Add(fieldValues);
+                batch.Add(GenerateTestRecord(_fieldDefinitions));
             }
 
-            Assert.DoesNotThrow(() => client.Insert(externalKey, batch));
-            records = client.RetrieveRecords(externalKey);
+            Assert.DoesNotThrow(() => _client.InsertOrUpdate(_externalKey, batch));
+            records = _client.RetrieveRecords(_externalKey);
             Assert.That(records.Count(), Is.EqualTo(204));
 
-            Assert.DoesNotThrow(() => client.Delete(externalKey));
-            Assert.That(client.DoesDataExtensionExist(externalKey), Is.False);
+          
 
+        }
+
+        private static Dictionary<string, string> GenerateTestRecord(IEnumerable<Field> fields)
+        {
+            var fieldValues = new Dictionary<string, string>();
+            foreach (var field in fields)
+            {
+                switch (field.FieldType)
+                {
+                    case FieldType.Boolean:
+                        fieldValues.Add(field.Name, "true");
+                        break;
+                    case FieldType.Date:
+                        fieldValues.Add(field.Name, DateTime.Now.AddDays(DateTime.Now.Millisecond % 500).ToString("u"));
+                        break;
+                    case FieldType.Text:
+                        fieldValues.Add(field.Name, Guid.NewGuid().ToString());
+                        break;
+                    case FieldType.EmailAddress:
+                        fieldValues.Add(field.Name, "name@domain.uri");
+                        break;
+                }
+            }
+            return fieldValues;
         }
     }
 }
