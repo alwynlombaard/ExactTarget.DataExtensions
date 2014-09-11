@@ -49,7 +49,7 @@ namespace ExactTarget.DataExtensions.Test.Integration
             Assert.DoesNotThrow(() => client.CreateDataExtension(createRequest));
             Assert.That(client.DoesDataExtensionExist(externalKey), Is.True);
 
-            var fields = client.GetFields(externalKey);
+            var fields = client.GetFields(externalKey).ToArray();
             Assert.That(fields.Count(), Is.EqualTo(3));
 
             Assert.DoesNotThrow(() =>  client.Insert(externalKey, new Dictionary<string, string>
@@ -69,12 +69,61 @@ namespace ExactTarget.DataExtensions.Test.Integration
             var records = client.RetrieveRecords(externalKey, "field 1", "true");
             Assert.That(records.Count(), Is.EqualTo(1));
 
+            records = client.RetrieveRecords(externalKey).ToArray();
+            Assert.That(records.Count(), Is.EqualTo(2));
+
+            
+            Assert.DoesNotThrow(() => client.Insert(externalKey,
+                new List<Dictionary<string, string>>{
+                    new Dictionary<string, string>
+                        {
+                            { "field 1", "false" },
+                            { "field 2", "14 Apr 2012" },
+                            { "Text", "Hello text 3" },
+                        },
+                        new Dictionary<string, string>
+                        {
+                            { "field 1", "true" },
+                            { "field 2", "15 Apr 2012" },
+                            { "Text", "Hello text 4" },
+                        }}
+                   ));
+
+            records = client.RetrieveRecords(externalKey).ToArray();
+            Assert.That(records.Count(), Is.EqualTo(4));
+
+            var batch = new List<Dictionary<string, string>>();
+            for (var i = 0; i < 200; i++)
+            {
+                var fieldValues = new Dictionary<string, string>();
+                foreach (var field in fields)
+                {
+                    switch (field.FieldType)
+                    {
+                        case FieldType.Boolean:
+                            fieldValues.Add(field.Name, "true");
+                            break;
+                        case FieldType.Date:
+                             fieldValues.Add(field.Name, DateTime.Now.AddDays(i).ToString("u"));
+                             break;
+                        case FieldType.Text:
+                             fieldValues.Add(field.Name, "Text value");
+                             break;
+                        case FieldType.EmailAddress:
+                             fieldValues.Add(field.Name, "name@domain.uri");
+                             break;
+                    }
+                }
+                batch.Add(fieldValues);
+            }
+
+            Assert.DoesNotThrow(() => client.Insert(externalKey, batch));
+            records = client.RetrieveRecords(externalKey);
+            Assert.That(records.Count(), Is.EqualTo(204));
+
             Assert.DoesNotThrow(() => client.Delete(externalKey));
             Assert.That(client.DoesDataExtensionExist(externalKey), Is.False);
 
-            //var objectId = client.RetrieveObjectId("alwyn-1");
-            //var fields = client.GetFields("alwyn-13:13");
-            //var extension = client.RetrieveDefinition("alwyn-1");
         }
     }
 }

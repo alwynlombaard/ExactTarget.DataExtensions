@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using ExactTarget.DataExtensions.Core.Configuration;
 using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
@@ -8,7 +9,7 @@ namespace ExactTarget.DataExtensions.Core
     {
        IExactTargetConfiguration Config { get; }
        void Create(APIObject apiObject);
-       CreateResult[] Create(APIObject[] apiObject);
+       IEnumerable<ResultError> Create(APIObject[] apiObject);
        void Delete(APIObject apiObject);
        APIObject[] Retrieve(RetrieveRequest request);
        bool DoesObjectExist(string propertyName, string value, string objectType);
@@ -45,11 +46,11 @@ namespace ExactTarget.DataExtensions.Core
             ExactTargetResultChecker.CheckResult(result.FirstOrDefault());
         }
 
-        public CreateResult[] Create(APIObject[] apiObjects)
+        public IEnumerable<ResultError> Create(APIObject[] apiObjects)
         {
             string requestId, status;
             var results = _client.Create(new CreateOptions(), apiObjects, out requestId, out status);
-            return results;
+            return ExactTargetResultChecker.CheckResults(results);
         }
 
         public APIObject[] Retrieve(RetrieveRequest request)

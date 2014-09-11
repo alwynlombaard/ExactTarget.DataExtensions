@@ -33,8 +33,7 @@ namespace ExactTarget.DataExtensions.Core
                 }
             }
 
-            var result = _client.Create(dataExtensions.ToArray());
-            return ExactTargetResultChecker.CheckResults(result);
+            return _client.Create(dataExtensions.ToArray());
         }
 
         public void CreateDataExtension(DataExtensionRequest request)
@@ -82,7 +81,7 @@ namespace ExactTarget.DataExtensions.Core
             };
 
             var de = (DataExtension)_client.Retrieve(request).FirstOrDefault();
-            return MapToDto(de);
+            return DataExtensionDto.MapFrom(de);
         }
 
         public IEnumerable<Field> GetFields(string externalKey)
@@ -142,6 +141,30 @@ namespace ExactTarget.DataExtensions.Core
             _client.Create(apiObjects);
         }
 
+        public void Insert(string externalKey, IEnumerable<Dictionary<string, string>> values)
+        {
+            var apiObjects = new List<APIObject>();    
+            foreach (var value in values)
+            {
+                var apiProperties = new List<APIProperty>();
+                foreach (var key in value.Keys)
+                {
+                    apiProperties.Add(new APIProperty
+                    {
+                        Name = key,
+                        Value = value[key]
+                    });
+                }
+                apiObjects.Add(new DataExtensionObject
+                {
+                    Client = _client.Config.ClientId.HasValue ? new ClientID { ID = _client.Config.ClientId.Value, IDSpecified = true } : null,
+                    Properties = apiProperties.ToArray(),
+                    CustomerKey = externalKey,
+                });
+            }
+            _client.Create(apiObjects.ToArray());
+        }
+
         private IEnumerable<string> GetRetrievableProperties(string objectType)
         {
             var results = _client.Describe(new[] 
@@ -164,7 +187,7 @@ namespace ExactTarget.DataExtensions.Core
             return Enumerable.Empty<string>();
         }
 
-        public IEnumerable<DataExtensionRecordDto> RetrieveRecords(string externalKey, string fieldName, string fieldValue)
+        public IEnumerable<DataExtensionRecordDto> RetrieveRecords(string externalKey, string fieldName = null, string fieldValue = null)
         {
             var request = new RetrieveRequest
             {
@@ -173,12 +196,14 @@ namespace ExactTarget.DataExtensions.Core
                     : null,
                 ObjectType = "DataExtensionObject[" + externalKey + "]",
                 Properties = GetFields(externalKey).Select(f => f.Name).ToArray(),
-                Filter = new SimpleFilterPart
-                {
-                    Property = fieldName,
-                    SimpleOperator = SimpleOperators.@equals,
-                    Value = new[] {fieldValue}
-                }
+                Filter = !string.IsNullOrEmpty(fieldName) && !string.IsNullOrEmpty(fieldValue) 
+                    ? new SimpleFilterPart
+                        {
+                            Property = fieldName,
+                            SimpleOperator = SimpleOperators.@equals,
+                            Value = new[] {fieldValue}
+                        }
+                    : null
             };
             var results = _client.Retrieve(request);
             return results.Cast<DataExtensionObject>()
@@ -210,15 +235,6 @@ namespace ExactTarget.DataExtensions.Core
             };
         }
 
-        private static DataExtensionDto MapToDto(DataExtension dataExtension)
-        {
-            return dataExtension != null 
-                ? new DataExtensionDto
-                    {
-                        ExternalKey = dataExtension.CustomerKey,
-                        Name = dataExtension.Name,
-                    }
-                : new DataExtensionDto();
-        }
+       
     }
 }

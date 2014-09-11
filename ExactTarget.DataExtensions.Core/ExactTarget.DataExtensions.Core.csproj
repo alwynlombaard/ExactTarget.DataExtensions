@@ -49,6 +49,7 @@
     <Compile Include="DataExtensionRequest.cs" />
     <Compile Include="ExactTargetResultChecker.cs" />
     <Compile Include="ExternalKeyGenerator.cs" />
+    <Compile Include="Field.cs" />
     <Compile Include="IExactTargetApiClient.cs" />
     <Compile Include="IDataExtensionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
