@@ -43,12 +43,20 @@ namespace ExactTarget.DataExtensions.Core
             {
                 return;
             }
-
             var de = MapFrom(request);
+            _client.Create(de);
+        }
 
-            var result = _client.Create(de);
-
-            ExactTargetResultChecker.CheckResult(result); 
+        public void Delete(string externalKey)
+        {
+            var de = new DataExtension
+            {
+                Client = _client.Config.ClientId.HasValue 
+                    ? new ClientID { ID = _client.Config.ClientId.Value, IDSpecified = true } 
+                    : null,
+                CustomerKey = externalKey
+            };
+            _client.Delete(de);
         }
 
         public bool DoesDataExtensionExist(string externalKey)
@@ -77,7 +85,7 @@ namespace ExactTarget.DataExtensions.Core
             return MapToDto(de);
         }
 
-        public IEnumerable<DataExtensionField> GetFields(string externalKey)
+        public IEnumerable<Field> GetFields(string externalKey)
         {
             var request = new RetrieveRequest
             {
@@ -94,7 +102,10 @@ namespace ExactTarget.DataExtensions.Core
                 }
             };
 
-            return _client.Retrieve(request).Cast<DataExtensionField>();
+            return _client.Retrieve(request)
+                .Cast<DataExtensionField>()
+                .Select(Field.MapFrom)
+                .OrderBy(f => f.Ordinal);
         }
 
         public string RetrieveTriggeredSendDataExtensionTemplateObjectId()

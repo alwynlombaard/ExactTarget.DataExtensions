@@ -7,8 +7,9 @@ namespace ExactTarget.DataExtensions.Core
     public interface IExactTargetApiClient
     {
        IExactTargetConfiguration Config { get; }
-       CreateResult Create(APIObject apiObject);
+       void Create(APIObject apiObject);
        CreateResult[] Create(APIObject[] apiObject);
+       void Delete(APIObject apiObject);
        APIObject[] Retrieve(RetrieveRequest request);
        bool DoesObjectExist(string propertyName, string value, string objectType);
        string RetrieveObjectId(string propertyName, string value, string objectType);
@@ -30,11 +31,18 @@ namespace ExactTarget.DataExtensions.Core
             _client = SoapClientFactory.Manufacture(config);
         }
 
-        public CreateResult Create(APIObject apiObject)
+        public void Delete(APIObject apiObject)
+        {
+            string requestId, status;
+            var result = _client.Delete(new DeleteOptions(), new[] {apiObject}, out requestId, out status);
+            ExactTargetResultChecker.CheckResult(result.FirstOrDefault());
+        }
+
+        public void Create(APIObject apiObject)
         {
             string requestId, status;
             var result = _client.Create(new CreateOptions(), new [] { apiObject }, out requestId, out status);
-            return result.FirstOrDefault();
+            ExactTargetResultChecker.CheckResult(result.FirstOrDefault());
         }
 
         public CreateResult[] Create(APIObject[] apiObjects)

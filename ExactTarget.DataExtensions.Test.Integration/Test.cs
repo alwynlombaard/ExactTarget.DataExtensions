@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using ExactTarget.DataExtensions.Core;
 using ExactTarget.DataExtensions.Core.Configuration;
-using ExactTarget.DataExtensions.Core.ExactTargetApi;
 using NUnit.Framework;
 
 namespace ExactTarget.DataExtensions.Test.Integration
@@ -26,38 +24,9 @@ namespace ExactTarget.DataExtensions.Test.Integration
                 
             };
         }
-
+     
         [Test]
-        public void Describe()
-        {
-            var apiClient = new ExactTargetApiClient(_config);
-            var results = apiClient.Describe(new[] 
-            {
-                new ObjectDefinitionRequest
-                {
-                    Client = _config.ClientId.HasValue ? new ClientID(){ClientID1 = _config.ClientId.Value} : null,
-                    ObjectType = "DataExtension"
-                }  
-            });
-            var fields = results.FirstOrDefault()
-                .Properties
-                .Where(p => p.IsRetrievable)
-                .Select(p => p);
-                
-
-            Assert.Fail();
-        }
-
-        [Test]
-        public void Exist()
-        {
-            var dataExtensionClient = new DataExtensionClient(new ExactTargetApiClient(_config));
-            Assert.That(dataExtensionClient.DoesDataExtensionExist("alwyn-1"), Is.True);
-            Assert.That(dataExtensionClient.DoesDataExtensionExist("alwyn-dkjhgsdkfkhsdkjjh"), Is.False);
-        }
-
-        [Test]
-        public void Create()
+        public void IntegrationTest()
         {
             var externalKey = "alwyn-" + DateTime.Now.ToString("MM-HH-mm");
             var apiClient = new ExactTargetApiClient(_config);
@@ -67,11 +36,11 @@ namespace ExactTarget.DataExtensions.Test.Integration
             {
                 ExternalKey = externalKey,
                 Fields =
-                    new Dictionary<string, DataExtensionRequestFieldType>()
+                    new Dictionary<string, FieldType>
                     {
-                        {"field 1", DataExtensionRequestFieldType.Boolean},
-                        {"field 2", DataExtensionRequestFieldType.Date},
-                        {"Text", DataExtensionRequestFieldType.Text}
+                        {"field 1", FieldType.Boolean},
+                        {"field 2", FieldType.Date},
+                        {"Text", FieldType.Text}
                     },
                 Name = "Name:" + externalKey,
             };
@@ -83,14 +52,14 @@ namespace ExactTarget.DataExtensions.Test.Integration
             var fields = client.GetFields(externalKey);
             Assert.That(fields.Count(), Is.EqualTo(3));
 
-            Assert.DoesNotThrow(() =>  client.Insert(externalKey, new Dictionary<string, string>()
+            Assert.DoesNotThrow(() =>  client.Insert(externalKey, new Dictionary<string, string>
             {
                 { "field 1", "true" },
                 { "field 2", "12 Apr 2012" },
                 { "Text", "Hello text" },
             }));
 
-            Assert.DoesNotThrow(() => client.Insert(externalKey, new Dictionary<string, string>()
+            Assert.DoesNotThrow(() => client.Insert(externalKey, new Dictionary<string, string>
             {
                 { "field 1", "false" },
                 { "field 2", "13 Apr 2012" },
@@ -100,6 +69,8 @@ namespace ExactTarget.DataExtensions.Test.Integration
             var records = client.RetrieveRecords(externalKey, "field 1", "true");
             Assert.That(records.Count(), Is.EqualTo(1));
 
+            Assert.DoesNotThrow(() => client.Delete(externalKey));
+            Assert.That(client.DoesDataExtensionExist(externalKey), Is.False);
 
             //var objectId = client.RetrieveObjectId("alwyn-1");
             //var fields = client.GetFields("alwyn-13:13");

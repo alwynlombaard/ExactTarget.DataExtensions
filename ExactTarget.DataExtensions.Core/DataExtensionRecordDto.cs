@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
 namespace ExactTarget.DataExtensions.Core
@@ -19,7 +20,7 @@ namespace ExactTarget.DataExtensions.Core
                 return dto;
             }
 
-            foreach (var value in dataExtensionObject.Keys)
+            foreach (var value in dataExtensionObject.Properties)
             {
                 dto.Values.Add(value.Name, value.Value);
             }
