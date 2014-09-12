@@ -81,14 +81,14 @@ namespace ExactTarget.DataExtensions.Test.Integration
             var record = GenerateTestRecord(_fieldDefinitions);
             Assert.DoesNotThrow(() => _client.InsertOrUpdate(_externalKey, record));
 
-            var records = _client.RetrieveRecords(_externalKey, "IdField", record["IdField"]);
+            var records = _client.RetrieveRecords(_externalKey, "IdField", record.Values["IdField"]);
             Assert.That(records.Count(), Is.EqualTo(1));
 
             records = _client.RetrieveRecords(_externalKey).ToArray();
             Assert.That(records.Count(), Is.EqualTo(2));
             
             Assert.DoesNotThrow(() => _client.InsertOrUpdate(_externalKey,
-                new List<Dictionary<string, string>>{
+                new List<DataExtensionRecordDto>{
                        GenerateTestRecord(_fieldDefinitions),
                        GenerateTestRecord(_fieldDefinitions),
                 }));
@@ -96,7 +96,7 @@ namespace ExactTarget.DataExtensions.Test.Integration
             records = _client.RetrieveRecords(_externalKey).ToArray();
             Assert.That(records.Count(), Is.EqualTo(4));
 
-            var batch = new List<Dictionary<string, string>>();
+            var batch = new List<DataExtensionRecordDto>();
             for (var i = 0; i < 200; i++)
             {
                 batch.Add(GenerateTestRecord(_fieldDefinitions));
@@ -110,8 +110,9 @@ namespace ExactTarget.DataExtensions.Test.Integration
 
         }
 
-        private static Dictionary<string, string> GenerateTestRecord(IEnumerable<Field> fields)
+        private static DataExtensionRecordDto GenerateTestRecord(IEnumerable<Field> fields)
         {
+            var record = new DataExtensionRecordDto();
             var fieldValues = new Dictionary<string, string>();
             foreach (var field in fields)
             {
@@ -131,7 +132,8 @@ namespace ExactTarget.DataExtensions.Test.Integration
                         break;
                 }
             }
-            return fieldValues;
+            record.Values = fieldValues;
+            return record;
         }
     }
 }

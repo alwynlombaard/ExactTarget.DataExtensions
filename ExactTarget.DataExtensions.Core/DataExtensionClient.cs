@@ -119,15 +119,15 @@ namespace ExactTarget.DataExtensions.Core
             return _client.RetrieveObjectId("CustomerKey", externalKey, "DataExtension");
         }
 
-        public void InsertOrUpdate(string externalKey, Dictionary<string, string> values)
+        public void InsertOrUpdate(string externalKey, DataExtensionRecordDto record)
         {
             var apiProperties = new List<APIProperty>();
-            foreach (var key in values.Keys)
+            foreach (var key in record.Values.Keys)
             {
                 apiProperties.Add(new APIProperty
                 {
                   Name  = key,
-                  Value = values[key]
+                  Value = record.Values[key]
                 });
             }
 
@@ -143,18 +143,18 @@ namespace ExactTarget.DataExtensions.Core
             _client.Update(apiObjects);
         }
 
-        public void InsertOrUpdate(string externalKey, IEnumerable<Dictionary<string, string>> values)
+        public void InsertOrUpdate(string externalKey, IEnumerable<DataExtensionRecordDto> records)
         {
-            var apiObjects = new List<APIObject>();    
-            foreach (var value in values)
+            var apiObjects = new List<APIObject>();
+            foreach (var record in records)
             {
                 var apiProperties = new List<APIProperty>();
-                foreach (var key in value.Keys)
+                foreach (var field in record.Values.Keys)
                 {
                     apiProperties.Add(new APIProperty
                     {
-                        Name = key,
-                        Value = value[key]
+                        Name = field,
+                        Value = record.Values[field]
                     });
                 }
                 apiObjects.Add(new DataExtensionObject

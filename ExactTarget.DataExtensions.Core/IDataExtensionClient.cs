@@ -15,8 +15,9 @@ namespace ExactTarget.DataExtensions.Core
         string RetrieveTriggeredSendDataExtensionTemplateObjectId();
 
         IEnumerable<Field> GetFields(string externalKey);
-        void InsertOrUpdate(string externalKey, Dictionary<string, string> values);
-        void InsertOrUpdate(string externalKey, IEnumerable<Dictionary<string, string>> values);
+
+        void InsertOrUpdate(string externalKey, DataExtensionRecordDto record);
+        void InsertOrUpdate(string externalKey, IEnumerable<DataExtensionRecordDto> records);
         IEnumerable<DataExtensionRecordDto> RetrieveRecords(string externalKey, string fieldName, string fieldValue);
     }
 }
