@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using ExactTarget.DataExtensions.Core.Dto;
+using ExactTarget.DataExtensions.Core.SoapApiClient;
 
 namespace ExactTarget.DataExtensions.Core
 {

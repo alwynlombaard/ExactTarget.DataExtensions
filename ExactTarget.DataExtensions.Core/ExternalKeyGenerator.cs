@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ExactTarget.TriggeredEmail.Core
+namespace ExactTarget.DataExtensions.Core
 {
     public class ExternalKeyGenerator
     {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ExactTarget.DataExtensions.Core.Dto;
 using ExactTarget.DataExtensions.Core.ExactTargetApi;
+using ExactTarget.DataExtensions.Core.SoapApiClient;
 
 namespace ExactTarget.DataExtensions.Core
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ExactTarget.DataExtensions.Core
+namespace ExactTarget.DataExtensions.Core.Dto
 {
     public class DataExtensionRequest
     {

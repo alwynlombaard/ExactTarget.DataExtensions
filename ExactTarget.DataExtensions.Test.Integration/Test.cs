@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ExactTarget.DataExtensions.Core;
 using ExactTarget.DataExtensions.Core.Configuration;
+using ExactTarget.DataExtensions.Core.Dto;
+using ExactTarget.DataExtensions.Core.SoapApiClient;
 using NUnit.Framework;
 
 namespace ExactTarget.DataExtensions.Test.Integration

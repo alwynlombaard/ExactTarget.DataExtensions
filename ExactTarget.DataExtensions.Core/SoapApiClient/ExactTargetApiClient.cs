@@ -3,22 +3,8 @@ using System.Linq;
 using ExactTarget.DataExtensions.Core.Configuration;
 using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
-namespace ExactTarget.DataExtensions.Core
+namespace ExactTarget.DataExtensions.Core.SoapApiClient
 {
-    public interface IExactTargetApiClient
-    {
-       IExactTargetConfiguration Config { get; }
-       void Create(APIObject apiObject);
-       void Update(APIObject apiObject);
-       IEnumerable<ResultError> Create(APIObject[] apiObject);
-       IEnumerable<ResultError> Update(APIObject[] apiObject);
-       void Delete(APIObject apiObject);
-       APIObject[] Retrieve(RetrieveRequest request);
-       bool DoesObjectExist(string propertyName, string value, string objectType);
-       string RetrieveObjectId(string propertyName, string value, string objectType);
-       ObjectDefinition[] Describe(ObjectDefinitionRequest[] requests);
-    }
-
     public class ExactTargetApiClient : IExactTargetApiClient
     {
         private readonly IExactTargetConfiguration _config;
@@ -55,9 +41,9 @@ namespace ExactTarget.DataExtensions.Core
         {
             string requestId, status;
             var result = _client.Update(new UpdateOptions
-                {
-                    SaveOptions = new[] { new SaveOption { SaveAction = SaveAction.UpdateAdd, PropertyName = "DataExtensionObject" } }
-                },
+            {
+                SaveOptions = new[] { new SaveOption { SaveAction = SaveAction.UpdateAdd, PropertyName = "DataExtensionObject" } }
+            },
                 new[] { apiObject },
                 out requestId,
                 out status);
@@ -78,9 +64,9 @@ namespace ExactTarget.DataExtensions.Core
         {
             string requestId, status;
             var results = _client.Update(new UpdateOptions
-                {
-                    SaveOptions = new[] { new SaveOption { SaveAction = SaveAction.UpdateAdd, PropertyName = "DataExtensionObject" } }
-                },
+            {
+                SaveOptions = new[] { new SaveOption { SaveAction = SaveAction.UpdateAdd, PropertyName = "DataExtensionObject" } }
+            },
                 apiObjects,
                 out requestId,
                 out status);
@@ -125,8 +111,8 @@ namespace ExactTarget.DataExtensions.Core
             var request = new RetrieveRequest
             {
                 ClientIDs = _config.ClientId.HasValue
-                            ? new[] { new ClientID { ID = _config.ClientId.Value, IDSpecified = true } }
-                            : null,
+                    ? new[] { new ClientID { ID = _config.ClientId.Value, IDSpecified = true } }
+                    : null,
                 ObjectType = objectType,
                 Properties = new[] { "Name", "ObjectID", "CustomerKey" },
                 Filter = new SimpleFilterPart

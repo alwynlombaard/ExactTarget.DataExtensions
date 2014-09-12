@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
-namespace ExactTarget.DataExtensions.Core
+namespace ExactTarget.DataExtensions.Core.SoapApiClient
 {
     public class ResultError
     {

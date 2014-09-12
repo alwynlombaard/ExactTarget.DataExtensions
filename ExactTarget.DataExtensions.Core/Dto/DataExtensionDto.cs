@@ -1,6 +1,6 @@
 ﻿using ExactTarget.DataExtensions.Core.ExactTargetApi;
 
-namespace ExactTarget.DataExtensions.Core
+namespace ExactTarget.DataExtensions.Core.Dto
 {
     public class DataExtensionDto
     {
