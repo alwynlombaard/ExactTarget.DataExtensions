@@ -233,6 +233,9 @@ namespace ExactTarget.DataExtensions.Core
                     Name = field.Name,
                     FieldType = Enum.TryParse(field.FieldType.ToString(), true, out etFieldType)  ? etFieldType :  DataExtensionFieldType.Text,
                     FieldTypeSpecified = true,
+                    MaxLength = field.MaxLength.GetValueOrDefault(),
+                    MaxLengthSpecified = field.MaxLength.HasValue
+
                 }).ToArray(),
             };
 
