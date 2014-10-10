@@ -32,10 +32,10 @@ namespace ExactTarget.DataExtensions.Test.Integration
             _apiClient = new ExactTargetApiClient(_config);
             _fieldDefinitions = new HashSet<Field>
             {
-                new Field{Name =  "IdField", FieldType = FieldType.Text},
+                new Field{Name =  "IdField", FieldType = FieldType.Text, IsPrimaryKey = true, MaxLength = Guid.Empty.ToString().Length},
                 new Field{Name =  "BooleanField", FieldType = FieldType.Boolean},
                 new Field{Name =  "DateField", FieldType = FieldType.Date},
-                new Field{Name =  "TextField", FieldType = FieldType.Text},
+                new Field{Name =  "TextField", FieldType = FieldType.Text, MaxLength = 300},
                 new Field{Name =  "EmailAddressField", FieldType = FieldType.EmailAddress}
             };
             _client = new DataExtensionClient(_apiClient);
@@ -43,7 +43,7 @@ namespace ExactTarget.DataExtensions.Test.Integration
             {
                 ExternalKey = _externalKey,
                 Fields = _fieldDefinitions,
-                Name = "Name:" + _externalKey,
+                Name = "Name:" + _externalKey
             };
 
             Assert.That(_client.DoesDataExtensionExist(_externalKey), Is.False);
@@ -73,10 +73,9 @@ namespace ExactTarget.DataExtensions.Test.Integration
             Assert.That(dataExtensionDef.ExternalKey, Is.EqualTo(_externalKey));
 
             var fields = _client.GetFields(_externalKey).ToArray();
-            Assert.That(fields.Count(), Is.EqualTo(_fieldDefinitions.Count));
+            Assert.That(fields.Count(), Is.AtLeast(_fieldDefinitions.Count));
 
             Assert.DoesNotThrow(() =>  _client.InsertOrUpdate(_externalKey, GenerateTestRecord(_fieldDefinitions)));
-
 
             var record = GenerateTestRecord(_fieldDefinitions);
             Assert.DoesNotThrow(() => _client.InsertOrUpdate(_externalKey, record));

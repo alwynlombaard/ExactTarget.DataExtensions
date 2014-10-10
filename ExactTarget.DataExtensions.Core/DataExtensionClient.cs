@@ -28,6 +28,10 @@ namespace ExactTarget.DataExtensions.Core
 
             foreach (var request in dataExtensionRequests)
             {
+                if (!request.Fields.Any(f => f.IsPrimaryKey))
+                {
+                    throw new ArgumentException("A Primary key must be defined.");
+                }
                 var de = MapFrom(request);
                 if (de != null)
                 {
@@ -44,6 +48,11 @@ namespace ExactTarget.DataExtensions.Core
             {
                 return;
             }
+            if (!request.Fields.Any(f => f.IsPrimaryKey))
+            {
+                throw new ArgumentException("A Primary key must be defined.");
+            }
+
             var de = MapFrom(request);
             _client.Create(de);
         }
@@ -230,6 +239,10 @@ namespace ExactTarget.DataExtensions.Core
                     : new DataExtensionTemplate { ObjectID = request.TemplateObjectId },
                 Fields = request.Fields.Select(field => new DataExtensionField
                 {
+                    IsPrimaryKey = field.IsPrimaryKey,
+                    IsPrimaryKeySpecified = field.IsPrimaryKey,
+                    IsRequired = field.IsPrimaryKey,
+                    IsRequiredSpecified = field.IsPrimaryKey,
                     Name = field.Name,
                     FieldType = Enum.TryParse(field.FieldType.ToString(), true, out etFieldType)  ? etFieldType :  DataExtensionFieldType.Text,
                     FieldTypeSpecified = true,
@@ -238,22 +251,7 @@ namespace ExactTarget.DataExtensions.Core
 
                 }).ToArray(),
             };
-
-            if (de.Fields.Any())
-            {
-                if (de.Fields.First().FieldType == DataExtensionFieldType.Text)
-                {
-                    de.Fields.First().MaxLength = Guid.Empty.ToString().Length;
-                    de.Fields.First().MaxLengthSpecified = true;
-                }
-                de.Fields.First().IsRequired = true;
-                de.Fields.First().IsRequiredSpecified = true;
-                de.Fields.First().IsPrimaryKey = true;
-                de.Fields.First().IsPrimaryKeySpecified = true;
-            }
             return de;
         }
-
-       
     }
 }
